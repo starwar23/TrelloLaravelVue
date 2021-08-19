@@ -4,9 +4,10 @@
         <div class="row">
             <div class="col-lg-3" v-for="desk in desks">
                 <div class="card mt-4">
-                    <a class="card-body" href="#">
-                        <h5 class="card-title">{{desk.name}}</h5>
-                    </a>
+                    <router-link class="card-body" :to="{name: 'showDesk', params: {deskId:desk.id}}">
+                        <h4 class="card-title">{{desk.name}}</h4>
+                    </router-link>
+                    <button type="button" @click="deleteDesk(desk.id)" class="btn btn-danger">Удалить</button>
                 </div>
             </div>
 
@@ -24,17 +25,41 @@
                 load:true
             }
         },
+        methods:{
+            getDesks(){
+                axios.get('/api/V1/desks')
+                    .then(res =>{
+                        this.desks = res.data.data
+                    })
+                    .catch(error =>{
+                        console.log(error);
+                    })
+                    .finally(()=>{
+                        this.load = false
+                    })
+            },
+            deleteDesk(id){
+                if(confirm("Вы действительно хотите удалить доску?")){
+                    axios.post('/api/V1/desks/' + id,{
+                        _method:"DELETE",
+                    })
+                        .then(res =>{
+                            this.desks = []
+                            this.getDesks()
+                        })
+                        .catch(error =>{
+                            console.log(error);
+                        })
+                        .finally(()=>{
+                            this.load = false
+                        })
+                }
+
+
+            }
+        },
         mounted(){
-            axios.get('/api/V1/desks')
-                .then(res =>{
-                    this.desks = res.data.data
-                })
-                .catch(error =>{
-                    console.log(error);
-                })
-                .finally(()=>{
-                    this.load = false
-                })
+          this.getDesks()
         }
     }
 </script>
